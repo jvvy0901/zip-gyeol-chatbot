@@ -123,12 +123,11 @@
     scrollToEnd(true);
   }
 
-  // 겨리의 한 턴: [아바타 | 카드(본문 · 진행 상태 · 출처) + 딸린 행동(칩·다시 보내기)]
+  // 겨리의 한 턴: 카드(본문 · 진행 상태 · 출처) + 딸린 행동(칩·다시 보내기)
   function botTurn() {
     const turn = document.createElement("div");
     turn.className = "turn bot";
-    turn.innerHTML = `<img class="avatar" src="/widget/clips/poster.png" alt="" aria-hidden="true">
-      <div class="stack"><div class="card"></div></div>`;
+    turn.innerHTML = `<div class="stack"><div class="card"></div></div>`;
     log.appendChild(turn);
     return { turn, stack: turn.querySelector(".stack"), card: turn.querySelector(".card") };
   }
