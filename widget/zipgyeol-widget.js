@@ -66,12 +66,12 @@
     /* 말풍선: 기본 상태에서 항상 떠 있어요. 누르면 채팅이 열려요(버튼 안이라 클릭이 같이 가요). */
     /* 말풍선(미니멀): 꼬리·진한 그림자 없이 얇은 테두리 알약 하나. 캐릭터 옆에 붙어 있어 겨리의 말로 읽혀요. */
     .label {
-      position: absolute; right: calc(100% + 6px); top: 50%;
-      transform: translateY(-50%);
+      /* 캐릭터 왼쪽 위 대각선. 영상의 투명 여백(위·옆 약 18%)만큼 겹쳐서 지붕 모서리에 붙여요. */
+      position: absolute; right: calc(100% - var(--size) * .22); bottom: calc(100% - var(--size) * .2);
       white-space: nowrap; cursor: pointer;
       background: var(--paper); color: var(--ink);
       font-size: 13px; font-weight: 500; line-height: 1; letter-spacing: -0.2px;
-      padding: 9px 12px; border-radius: 999px;
+      padding: 9px 12px; border-radius: 16px 16px 4px 16px;   /* 캐릭터 쪽(오른쪽 아래) 모서리만 덜 둥글게 → 겨리가 하는 말 */
       border: 1px solid #E8ECF5;
       box-shadow: 0 1px 2px rgba(20, 33, 61, .06);   /* 사진 위에서도 떠 보이게 한 겹만 */
       transition: color .15s ease, border-color .15s ease;
@@ -79,8 +79,10 @@
     }
     .launcher:hover .label, .launcher:focus-visible .label { color: var(--blue); border-color: #C9D9FB; }
     .root.open .label, .root.dragging .label { display: none; }
-    /* 캐릭터를 화면 왼쪽으로 옮기면 말풍선은 오른쪽에 */
-    .root.left-side .label { right: auto; left: calc(100% + 6px); }
+    /* 화면 왼쪽에 두면 오른쪽 위 대각선으로, 위쪽에 두면 아래 대각선으로 (화면 밖으로 잘리지 않게) */
+    .root.left-side .label { right: auto; left: calc(100% - var(--size) * .22); border-radius: 16px 16px 16px 4px; }
+    .root.top-side .label { bottom: auto; top: calc(100% - var(--size) * .2); border-radius: 16px 4px 16px 16px; }
+    .root.top-side.left-side .label { border-radius: 4px 16px 16px 16px; }
     @keyframes bubble-in { from { opacity: 0; } to { opacity: 1; } }
 
     .panel {
