@@ -47,9 +47,12 @@
     .launcher {
       position: relative; display: block;
       width: var(--size); height: var(--size); padding: 0; margin: 0;
-      border: 0; background: transparent; cursor: pointer;
+      border: 0; background: transparent; cursor: grab;
       border-radius: 28px; -webkit-tap-highlight-color: transparent;
+      touch-action: none;          /* 손가락으로 끌 때 페이지가 같이 스크롤되지 않게 */
+      user-select: none; -webkit-user-select: none;
     }
+    .root.dragging .launcher { cursor: grabbing; }
     .launcher:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
     .stage { position: absolute; inset: 0; pointer-events: none; }
     .stage video, .stage img {
@@ -60,22 +63,29 @@
     .stage .incoming { z-index: 2; }
     .stage .fade { transition: opacity 100ms linear; }
 
+    /* 말풍선: 기본 상태에서 항상 떠 있어요. 누르면 채팅이 열려요(버튼 안이라 클릭이 같이 가요). */
+    /* 말풍선(미니멀): 꼬리·진한 그림자 없이 얇은 테두리 알약 하나. 캐릭터 옆에 붙어 있어 겨리의 말로 읽혀요. */
     .label {
-      position: absolute; right: calc(100% + 4px); top: 50%;
-      transform: translateY(-50%) translateX(4px);
-      white-space: nowrap; pointer-events: none;
+      position: absolute; right: calc(100% + 6px); top: 50%;
+      transform: translateY(-50%);
+      white-space: nowrap; cursor: pointer;
       background: var(--paper); color: var(--ink);
-      font-size: 14px; font-weight: 600; line-height: 1;
-      padding: 10px 14px; border-radius: 999px;
-      box-shadow: 0 4px 16px rgba(0, 64, 194, .18);
-      opacity: 0; transition: opacity .15s, transform .15s;
+      font-size: 13px; font-weight: 500; line-height: 1; letter-spacing: -0.2px;
+      padding: 9px 12px; border-radius: 999px;
+      border: 1px solid #E8ECF5;
+      box-shadow: 0 1px 2px rgba(20, 33, 61, .06);   /* 사진 위에서도 떠 보이게 한 겹만 */
+      transition: color .15s ease, border-color .15s ease;
+      animation: bubble-in .25s ease-out .6s both;
     }
-    .launcher:hover .label, .launcher:focus-visible .label { opacity: 1; transform: translateY(-50%); }
-    .root.open .label { display: none; }
+    .launcher:hover .label, .launcher:focus-visible .label { color: var(--blue); border-color: #C9D9FB; }
+    .root.open .label, .root.dragging .label { display: none; }
+    /* 캐릭터를 화면 왼쪽으로 옮기면 말풍선은 오른쪽에 */
+    .root.left-side .label { right: auto; left: calc(100% + 6px); }
+    @keyframes bubble-in { from { opacity: 0; } to { opacity: 1; } }
 
     .panel {
       position: absolute; right: 0; bottom: calc(var(--size) + 8px);
-      width: 380px; height: min(600px, calc(100vh - var(--size) - 48px));
+      width: 380px; height: min(600px, var(--avail, calc(100vh - var(--size) - 48px)));
       display: flex; flex-direction: column;
       background: var(--paper); border-radius: 20px; overflow: hidden;
       box-shadow: 0 16px 48px rgba(0, 40, 120, .24), 0 0 0 1px rgba(0, 64, 194, .08);
@@ -100,15 +110,26 @@
     .close:focus-visible { outline: 3px solid #fff; outline-offset: -4px; }
     iframe { flex: 1; width: 100%; border: 0; background: var(--paper); }
 
+    /* 캐릭터 위치에 따라 팝업을 공간이 있는 쪽으로 열어요 */
+    @media (min-width: 481px) {
+      .root.left-side .panel { right: auto; left: 0; transform-origin: bottom left; }
+      .root.top-side .panel { bottom: auto; top: calc(var(--size) + 8px); transform-origin: top right; }
+      .root.top-side.left-side .panel { transform-origin: top left; }
+      .root.top-side .panel.closing { transform: translateY(-8px) scale(.98); }
+    }
+
     @media (max-width: 480px) {
       .root { --size: 84px; right: 12px; bottom: 12px; }
       .panel {
         position: fixed; left: 12px; right: 12px; top: 12px; width: auto; height: auto;
         bottom: calc(var(--size) + 20px);
       }
+      /* 캐릭터를 위쪽에 두면 팝업은 그 아래를 채워요 */
+      .root.top-side .panel { top: calc(var(--y, 12px) + var(--size) + 8px); bottom: 12px; }
     }
     @media (prefers-reduced-motion: reduce) {
       .panel, .label, .stage .fade { transition: none !important; }
+      .label { animation: none !important; }
     }
   `;
 
@@ -133,7 +154,7 @@
         <span class="stage" aria-hidden="true">
           <img class="poster on" alt="" src="${CLIPS_BASE}poster.png">
         </span>
-        <span class="label">겨리에게 물어보기</span>
+        <span class="label" aria-hidden="true">궁금한 점 있으세요?</span>
       </button>
     </div>`;
 
@@ -377,7 +398,77 @@
     launcher.focus();
   }
 
-  launcher.addEventListener("click", () => (panel.hidden ? open() : close()));
+  // ---------- 끌어서 옮기기 ----------
+  // 6px 넘게 움직이면 끌기, 아니면 클릭(팝업 열기)이에요. 옮긴 자리는 이 브라우저에 기억해요.
+  const POS_KEY = "zipgyeol-widget-pos";
+  const MARGIN = 8;
+  let drag = null;
+  let justDragged = false;
+  let pos = null;   // {x, y}: 화면 왼쪽 위 기준 px. null이면 기본 자리(오른쪽 아래)
+
+  function clampPos(x, y) {
+    const s = launcher.offsetWidth || 104;
+    return {
+      x: Math.min(Math.max(MARGIN, x), window.innerWidth - s - MARGIN),
+      y: Math.min(Math.max(MARGIN, y), window.innerHeight - s - MARGIN),
+    };
+  }
+
+  function applyPos() {
+    if (pos) {
+      pos = clampPos(pos.x, pos.y);
+      Object.assign(root.style, { left: pos.x + "px", top: pos.y + "px", right: "auto", bottom: "auto" });
+      root.style.setProperty("--y", pos.y + "px");
+    }
+    // 팝업을 열 방향과 쓸 수 있는 높이
+    const r = launcher.getBoundingClientRect();
+    const leftSide = r.left + r.width / 2 < window.innerWidth / 2;
+    const topSide = r.top + r.height / 2 < window.innerHeight / 2;
+    root.classList.toggle("left-side", leftSide);
+    root.classList.toggle("top-side", topSide);
+    const avail = topSide ? window.innerHeight - r.bottom - 8 - 16 : r.top - 8 - 16;
+    root.style.setProperty("--avail", Math.max(240, avail) + "px");
+  }
+
+  function savePos() {
+    try { localStorage.setItem(POS_KEY, JSON.stringify(pos)); } catch { /* 기억 못 해도 동작해요 */ }
+  }
+  try {
+    const saved = JSON.parse(localStorage.getItem(POS_KEY) || "null");
+    if (saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)) pos = saved;
+  } catch { /* 기본 자리 */ }
+
+  launcher.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    const r = launcher.getBoundingClientRect();
+    drag = { id: e.pointerId, sx: e.clientX, sy: e.clientY, ox: r.left, oy: r.top, moved: false };
+    launcher.setPointerCapture(e.pointerId);
+  });
+  launcher.addEventListener("pointermove", (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.sx, dy = e.clientY - drag.sy;
+    if (!drag.moved && Math.hypot(dx, dy) < 6) return;
+    if (!drag.moved) { drag.moved = true; root.classList.add("dragging"); }
+    pos = { x: drag.ox + dx, y: drag.oy + dy };
+    applyPos();
+  });
+  function endDrag(e) {
+    if (!drag || e.pointerId !== drag.id) return;
+    if (drag.moved) {
+      justDragged = true;              // 끌기가 끝난 직후의 click은 무시해요
+      root.classList.remove("dragging");
+      savePos();
+    }
+    drag = null;
+  }
+  launcher.addEventListener("pointerup", endDrag);
+  launcher.addEventListener("pointercancel", endDrag);
+  window.addEventListener("resize", applyPos);
+
+  launcher.addEventListener("click", () => {
+    if (justDragged) { justDragged = false; return; }
+    panel.hidden ? open() : close();
+  });
   launcher.addEventListener("pointerenter", () => player.hover(true));
   launcher.addEventListener("pointerleave", () => player.hover(false));
   launcher.addEventListener("focus", () => player.hover(true));
@@ -396,6 +487,7 @@
 
   function mount() {
     document.body.appendChild(host);
+    applyPos();
     player.init();
   }
   document.body ? mount() : document.addEventListener("DOMContentLoaded", mount);
