@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>겨리 채팅 (테스트용)</title>
+<style>
+  :root { --blue: #0056FF; --ink: #14213D; --line: #E3E8F2; --soft: #F2F6FF; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { display: flex; flex-direction: column; font-family: "Pretendard", "Apple SD Gothic Neo", system-ui, sans-serif; color: var(--ink); background: #fff; }
+  .log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 15px; line-height: 1.5; }
+  .bot { background: var(--soft); align-self: flex-start; border-bottom-left-radius: 4px; }
+  .me { background: var(--blue); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+  .status { font-size: 13px; color: #5A6478; align-self: flex-start; }
+  form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--line); }
+  input { flex: 1; min-height: 44px; padding: 0 14px; font: inherit; border: 1px solid var(--line); border-radius: 12px; }
+  input:focus-visible { outline: 3px solid var(--blue); outline-offset: 0; border-color: var(--blue); }
+  button { min-height: 44px; padding: 0 16px; font: inherit; font-weight: 600; color: #fff; background: var(--blue); border: 0; border-radius: 12px; cursor: pointer; }
+  button:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  button:disabled { opacity: .5; cursor: default; }
+</style>
+</head>
+<body>
+  <div class="log" id="log" aria-live="polite">
+    <div class="msg bot">안녕하세요, 집결 도우미 겨리예요. 찾는 집이나 궁금한 점을 물어보세요.</div>
+  </div>
+  <form id="f">
+    <input id="q" autocomplete="off" placeholder="예: 성수동 투룸 전세 있어요?" aria-label="질문">
+    <button id="send">질문 보내기</button>
+  </form>
+<script>
+  // 실제 RAG 챗봇에서도 이 3줄만 맞춰 주면 캐릭터가 따라 움직여요.
+  //   검색 시작 → "searching", 답변 생성 시작 → "thinking", 답변 완료·오류 → "default"
+  const setCharacter = (state) => parent !== window && parent.postMessage({ type: "zipgyeol:state", state }, "*");
+  const closeWidget = () => parent !== window && parent.postMessage({ type: "zipgyeol:close" }, "*");
+
+  const log = document.getElementById("log"), q = document.getElementById("q"), send = document.getElementById("send");
+  const add = (cls, text) => { const d = document.createElement("div"); d.className = cls; d.textContent = text; log.appendChild(d); log.scrollTop = log.scrollHeight; return d; };
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const from = new URLSearchParams(location.search).get("from");
+  if (from && from !== "/") add("status", `보고 계신 페이지: ${from}`);
+
+  document.getElementById("f").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = q.value.trim(); if (!text) return;
+    add("msg me", text); q.value = ""; send.disabled = true;
+    const st = add("status", "문서에서 찾는 중이에요…");
+    setCharacter("searching");
+    await wait(2500);                 // ← 실제로는 벡터 검색
+    st.textContent = "답변을 정리하는 중이에요…";
+    setCharacter("thinking");
+    await wait(3000);                 // ← 실제로는 LLM 호출
+    st.remove();
+    add("msg bot", `"${text}"에 대한 테스트 답변이에요. 실제 챗봇을 연결하면 여기에 RAG 답변이 나와요.`);
+    setCharacter("default");
+    send.disabled = false; q.focus();
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeWidget(); });
+</script>
+</body>
+</html>

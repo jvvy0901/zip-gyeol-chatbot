@@ -1,0 +1,23 @@
+# Render 블루프린트: Dashboard → New → Blueprint 에서 이 저장소를 고르면 아래대로 만들어져요.
+# sync: false 인 값은 처음 만들 때 대시보드에서 입력하라고 물어봐요.
+services:
+  - type: web
+    name: zipgyeol-chatbot
+    runtime: python
+    plan: free
+    region: singapore            # 한국에서 가장 가까운 Render 지역
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: WEBSITE_URL         # 예: https://zipgyeol.onrender.com
+        sync: false
+      - key: CHAT_MODEL
+        value: gpt-6-luna
+      - key: CHAT_REASONING
+        value: medium
+      - key: RATE_LIMIT_PER_MIN
+        value: "15"

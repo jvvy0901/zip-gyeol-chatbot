@@ -1,0 +1,104 @@
+/* request.css — ④ 의뢰서 화면 배치 (담당: 팀원 B · 디자인 마무리: 원님)
+   색 · 글꼴 · 입력칸 · 버튼 · 카드 · 칩은 공통 style.css를 그대로 써요. 여기는 이 화면의 배치만 맡아요.
+   (예전 '2. 공통 스타일 보강' 구역은 공통 스타일이 main에 들어와서 지웠어요 — 모양은 같아요.)
+
+   게슈탈트 간격 규칙
+   · 공통 영역: 쓰는 곳 = 흰 카드, 미리보기 = 연한 패널 → 역할이 다른 두 영역이 한눈에 나뉨
+   · 근접성: 라벨↔칸 6px < 칸↔칸 16px < 묶음↔묶음 28px(+ 구분선)
+             세 묶음 = 나(닉네임) · 원하는 집(지역 · 예산 · 방) · 바라는 점(요청)
+   · 유사성: 미리보기도 같은 세 묶음 · 같은 구분선 → 왼쪽 칸과 오른쪽 결과가 짝으로 보임
+   · 정렬: 다른 페이지와 같은 본문 폭(1120px), 왼쪽 시작선 = 로고 */
+
+.req { color: var(--color-text); }
+.req .req-lead { color: var(--color-text-desc); margin: 0 0 24px; }
+.req .req-summary {
+  margin: 0 0 20px; padding: 12px 16px; border-radius: var(--radius-sm); font-weight: 600;
+  color: var(--color-error); background: color-mix(in srgb, var(--color-error) 8%, var(--color-white));
+}
+
+/* 왼쪽: 쓰는 곳 · 오른쪽: 쓰는 대로 채워지는 의뢰서 */
+.req-cols { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+
+/* ---------- 쓰는 곳 (흰 카드) ---------- */
+.req-form { padding: 28px; display: grid; gap: 0; }
+.req-group { display: grid; gap: 16px; padding: 0 0 28px; margin: 0 0 28px; border-bottom: 1px solid var(--color-border); }
+.req-group:last-of-type { border-bottom: 0; margin-bottom: 0; padding-bottom: 24px; }
+.req-group-title { display: flex; align-items: center; gap: 10px; margin: 0 0 -4px;   /* 제목↔첫 칸 12px < 칸↔칸 16px */ font-size: 17px; font-weight: 700; }
+.req-step {
+  display: inline-grid; place-items: center; width: 24px; height: 24px; flex-shrink: 0;
+  border-radius: 50%; background: var(--color-sub); color: var(--color-primary);
+  font-size: 13px; font-weight: 700;
+}
+
+.req-form .req-field { margin: 0; padding: 0; border: 0; min-width: 0; }
+.req-form .req-field > label, .req-form legend { display: block; margin: 0 0 6px; padding: 0; font-weight: 600; font-size: 15px; color: var(--color-text-sub); }
+.req-form small { font-size: 13px; font-weight: 400; color: var(--color-text-desc); margin-left: 6px; }
+.req-form .error { margin: 6px 0 0; }
+
+/* 예산: 칸 안에 단위, 아래에 읽는 말 */
+.req-budget { position: relative; }
+.req-budget input { padding-right: 60px; font-variant-numeric: tabular-nums; }
+.req-budget span { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--color-text-desc); font-size: 15px; pointer-events: none; }
+.req-read { margin: 6px 0 0; font-size: 14px; font-weight: 600; color: var(--color-primary); }
+.req-read:empty { display: none; }
+
+/* 방 수: 한 번 눌러 고르는 알약 (고르기 전 = .btn-sub 색, 고른 뒤 = .btn 색) */
+.req-rooms { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.req-rooms label { position: relative; display: block; margin: 0; cursor: pointer; }
+.req-rooms input { position: absolute; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; padding: 0; border: 0; opacity: 0; cursor: pointer; }
+.req-rooms span {
+  display: grid; place-items: center; min-height: 48px; font-weight: 600; font-size: 15px;
+  color: var(--color-primary); background: var(--color-sub); border-radius: var(--radius-pill);
+  transition: background .15s, color .15s;
+}
+.req-rooms label:hover span { background: var(--color-chip); }
+.req-rooms input:checked + span { background: var(--color-primary); color: var(--color-white); }
+.req-rooms input:focus-visible + span { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+
+/* 틀린 칸 */
+.req-form .bad input:not([type="radio"]), .req-form .bad textarea { border-color: var(--color-error); }
+.req-form .bad .req-rooms span { box-shadow: inset 0 0 0 1px var(--color-error); }
+.req-form .bad .req-rooms input:checked + span { box-shadow: none; }
+
+.req-form button { width: 100%; min-height: 52px; }
+
+/* ---------- 미리보기 (연한 패널) ---------- */
+.req-slip { position: sticky; top: 96px; padding: 24px; }
+.req-slip h2 { font-size: 18px; margin: 0; }
+.req-slip-hint { margin: 4px 0 0; padding-bottom: 16px; border-bottom: 1px solid var(--color-border); font-size: 13px; color: var(--color-text-desc); }
+.req-slip dl { display: grid; gap: 14px; margin: 16px 0 0; }
+.req-slip dl > div:nth-child(2),
+.req-slip dl > div:nth-child(5) { padding-top: 14px; border-top: 1px solid var(--color-border); }   /* 왼쪽 세 묶음과 같은 자리에서 나뉨 */
+.req-slip dt { font-size: 13px; color: var(--color-text-desc); margin: 0 0 2px; }
+.req-slip dd { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.35; overflow-wrap: anywhere; }
+.req-slip dd:empty::before { content: ""; display: block; width: 64px; height: 10px; margin: 8px 0 7px; border-radius: 5px; background: var(--color-chip); }
+.req-slip .req-slip-note dd { font-size: 15px; font-weight: 400; letter-spacing: 0; line-height: 1.6; white-space: pre-wrap; }
+.req-slip .req-slip-note dd:empty::before { width: 100%; }
+
+/* ---------- 최근 의뢰서 ---------- */
+.req-recent-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 64px 0 16px; }
+.req .req-recent { margin: 0; }
+.req-recent-count { color: var(--color-text-desc); font-size: 14px; }
+.req-list { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+.req-list .card { display: flex; flex-direction: column; gap: 12px; }
+.req-list p { margin: 0; }
+.req-who { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.req-who strong { font-size: 17px; overflow-wrap: anywhere; }
+.req-who .when { flex: none; color: var(--color-text-desc); font-size: 13px; font-variant-numeric: tabular-nums; }
+.req-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.req-tags .chip { padding: 5px 12px; font-size: 14px; overflow-wrap: anywhere; }
+.req-text { color: var(--color-text-sub); font-size: 15px; overflow-wrap: anywhere; }
+
+/* 빈 상태 — 공통 .empty-state (style.css) */
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 860px) {
+  .req-cols { grid-template-columns: minmax(0, 1fr); }
+  .req-slip { position: static; }
+}
+@media (max-width: 480px) {
+  .req-form { padding: 20px; }
+  .req-rooms { gap: 6px; }
+  .req-rooms span { font-size: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .req-rooms span { transition: none; } }

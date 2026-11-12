@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>겨리 · 집결 도우미</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/web/chat.css">
+<script>window.ZG_CONFIG = /*__CONFIG__*/{};</script>
+</head>
+<body>
+  <header class="top" id="top">
+    <h1>겨리 <span>집결 도우미</span></h1>
+  </header>
+
+  <main class="log" id="log" role="log" aria-live="polite" aria-relevant="additions" aria-label="대화 내용"></main>
+
+  <footer class="composer">
+    <form id="form" autocomplete="off">
+      <label class="sr-only" for="q">질문</label>
+      <textarea id="q" rows="1" maxlength="1000" placeholder="성수동 투룸 전세 있어요?" enterkeyhint="send"></textarea>
+      <button id="send" type="submit" aria-label="질문 보내기" title="질문 보내기">
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+          <path d="M10 16V4M4.5 9.5 10 4l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </form>
+  </footer>
+
+  <script src="/web/chat.js" defer></script>
+</body>
+</html>

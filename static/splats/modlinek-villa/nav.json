@@ -1,0 +1,27 @@
+{
+  "rotation": [
+    180,
+    0,
+    0
+  ],
+  "cell": 0.05,
+  "width": 192,
+  "depth": 172,
+  "minX": -2.212,
+  "minZ": -4.539,
+  "floorY": -0.224,
+  "ceilingY": 2.919,
+  "eyeHeight": 1.5,
+  "start": [
+    0.013,
+    1.276,
+    0.036
+  ],
+  "startYaw": 135,
+  "map": {
+    "minX": -2.062,
+    "minZ": -2.139,
+    "sizeX": 9.3,
+    "sizeZ": 6.0
+  }
+}

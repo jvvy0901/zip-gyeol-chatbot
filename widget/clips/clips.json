@@ -1,0 +1,76 @@
+{
+  "fps": 30,
+  "size": 720,
+  "clips": {
+    "idle": {
+      "file": "idle.webm",
+      "loop": true,
+      "frames": 120
+    },
+    "wave": {
+      "file": "wave.webm",
+      "loop": false,
+      "frames": 96,
+      "then": "idle"
+    },
+    "think_in": {
+      "file": "think_in.webm",
+      "loop": false,
+      "frames": 18,
+      "then": "think_loop"
+    },
+    "think_loop": {
+      "file": "think_loop.webm",
+      "loop": true,
+      "frames": 60
+    },
+    "think_out": {
+      "file": "think_out.webm",
+      "loop": false,
+      "frames": 16,
+      "then": "idle"
+    },
+    "inspect_in": {
+      "file": "inspect_in.webm",
+      "loop": false,
+      "frames": 24,
+      "then": "inspect_loop"
+    },
+    "inspect_loop": {
+      "file": "inspect_loop.webm",
+      "loop": true,
+      "frames": 90
+    },
+    "inspect_out": {
+      "file": "inspect_out.webm",
+      "loop": false,
+      "frames": 20,
+      "then": "idle"
+    }
+  },
+  "states": {
+    "default": {
+      "enter": null,
+      "loop": "idle",
+      "random_extra": [
+        "wave"
+      ],
+      "on_hover": "wave"
+    },
+    "thinking": {
+      "enter": "think_in",
+      "loop": "think_loop",
+      "exit": "think_out"
+    },
+    "searching": {
+      "enter": "inspect_in",
+      "loop": "inspect_loop",
+      "exit": "inspect_out"
+    }
+  },
+  "rules": [
+    "All clips start/end on the same neutral pose except *_loop clips, which start/end on their own held pose.",
+    "To leave thinking/searching, wait for the current *_loop to finish its cycle, then play the matching *_out.",
+    "idle and wave may be cut at any frame (low motion); swap with a ~100ms crossfade."
+  ]
+}

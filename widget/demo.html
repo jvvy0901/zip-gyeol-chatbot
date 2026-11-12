@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>집결 위젯 데모</title>
+<style>
+  body { margin: 0; font-family: "Pretendard", "Apple SD Gothic Neo", system-ui, sans-serif; color: #14213D; background: #F5F7FB; }
+  main { max-width: 720px; margin: 0 auto; padding: 32px 16px 160px; }
+  h1 { color: #0056FF; }
+  .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+  .tools button { min-height: 44px; padding: 0 14px; font: inherit; border: 1px solid #C9D6F5; background: #fff; border-radius: 10px; cursor: pointer; }
+  .tools button:focus-visible { outline: 3px solid #0056FF; outline-offset: 2px; }
+  code { background: #E8EEFC; padding: 2px 6px; border-radius: 6px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>집결</h1>
+  <p>집결 사이트 대신 쓰는 데모 페이지예요. 오른쪽 아래 겨리를 누르면 챗봇이 열려요.</p>
+  <p>겨리를 눌러 질문하면, 문서를 찾는 동안 <code>searching</code>, 답을 만드는 동안 <code>thinking</code>, 끝나면 <code>default</code>로 상태가 바뀌어요.</p>
+  <p>아래 버튼으로 상태를 직접 바꿔 볼 수도 있어요.</p>
+  <div class="tools">
+    <button onclick="ZipgyeolWidget.setState('default')">기본 상태로 바꾸기</button>
+    <button onclick="ZipgyeolWidget.setState('searching')">검색 상태로 바꾸기</button>
+    <button onclick="ZipgyeolWidget.setState('thinking')">생각 상태로 바꾸기</button>
+  </div>
+</main>
+<script src="zipgyeol-widget.js" data-chat-url="../" defer></script>
+</body>
+</html>

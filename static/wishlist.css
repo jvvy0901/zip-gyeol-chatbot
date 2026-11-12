@@ -1,0 +1,113 @@
+/* wishlist.css — ⑤ 찜 · 비교 화면 배치만 (담당: PO · 디자인 마무리: 원님)
+   색 · 글꼴 · 버튼 · 배지 · 페이지 제목 · 빈 상태는 공통 style.css를 따라요.
+
+   게슈탈트 간격 규칙
+   · 유사성: 매물 칸 너비를 똑같이(table-layout: fixed) → 사진 4:3 · 같은 크기, 거래 유형은 목록과 같은 배지
+   · 정렬: 사진은 모두 칸 맨 위에서 시작, 숫자는 같은 줄에서 비교
+   · 공통 영역: 표 전체 = 흰 카드 하나, 항목 이름 칸 = 연한 면으로 한 줄기
+   · 근접성: 사진↔이름 12px < 칸 안쪽 여백 16~20px */
+
+.wish h2 { font-size: 20px; margin: 0 0 6px; }
+.wish h2 small { font-size: 14px; font-weight: 500; color: var(--color-text-desc); margin-left: 6px; }
+.wish-hint { color: var(--color-text-desc); font-size: 15px; margin: 0 0 16px; }
+.muted { color: var(--color-text-desc); }
+
+/* 비교 표 — 좁은 화면에선 표만 옆으로 밀어서 봐요 */
+.compare-scroll {
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  background: var(--color-white); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.compare-scroll:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 2px; }
+
+.compare { width: 100%; min-width: 640px; table-layout: fixed; border-collapse: collapse; font-size: 15px; }
+.compare col.col-label { width: 132px; }
+.compare th, .compare td {
+  padding: 16px 20px; text-align: left; vertical-align: middle;
+  border-bottom: 1px solid var(--color-border);
+}
+.compare tbody tr:last-child th, .compare tbody tr:last-child td { border-bottom: 0; }
+.compare tbody th {
+  color: var(--color-text-label); font-weight: 600; font-size: 14px; white-space: nowrap;
+  background: var(--color-neutral);
+}
+.compare thead th { vertical-align: top; padding-top: 20px; padding-bottom: 20px; }
+.compare thead th:first-child { background: var(--color-neutral); }
+
+/* 사진 — 모든 칸에서 같은 너비 · 같은 4:3 */
+.compare-thumb {
+  position: relative; display: grid; place-items: center;
+  width: 100%; aspect-ratio: 4 / 3; overflow: hidden;
+  border-radius: 14px; background: var(--color-sub); color: var(--color-primary);
+  margin-bottom: 12px;
+}
+.compare-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
+.compare-thumb:hover img { transform: scale(1.03); }
+.compare-thumb svg { width: 44px; height: auto; opacity: .45; }
+.compare-thumb .listing-3d { left: 10px; bottom: 10px; }
+/* 찜 취소 — 사진 오른쪽 위 안쪽 (공통 영역: 이 매물에 대한 행동은 이 사진 안에) */
+.compare-photo { position: relative; margin-bottom: 12px; }
+.compare-photo .compare-thumb { margin-bottom: 0; }
+.compare-unwish { position: absolute; top: 10px; right: 10px; margin: 0; }
+.compare-unwish button {
+  min-height: 36px; height: 36px; padding: 0 12px 0 10px; gap: 4px;
+  font-size: 13px; font-weight: 700;
+  background: rgba(255, 255, 255, .94); color: var(--color-primary);
+  box-shadow: 0 2px 10px rgba(24, 27, 37, .16);
+}
+.compare-unwish button::before {             /* 보이는 크기는 36px, 누르는 범위는 44px */
+  content: ""; position: absolute; inset: -4px;
+}
+.compare-unwish button { position: relative; }
+.compare-unwish button:hover { background: var(--color-white); color: var(--color-primary-dark); }
+.compare-unwish svg { width: 16px; height: 16px; }
+
+.compare-title {
+  font-size: 16px; font-weight: 700; line-height: 1.35; color: var(--color-text); text-decoration: none;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;   /* 최대 2줄 → 칸끼리 줄 맞춤 */
+}
+.compare-title:hover { color: var(--color-primary); }
+
+/* 더 나은 값 — 색만으로 구분하지 않고 ★ 글자도 함께 */
+.compare td.best { background: var(--color-sub); font-weight: 700; color: var(--color-primary); }
+.best-mark { display: block; font-size: 13px; font-weight: 600; margin-top: 2px; }
+.compare small { color: var(--color-text-desc); font-weight: 500; }
+.compare td.best small { color: inherit; }
+
+.compare-3d { font-weight: 600; text-decoration: none; }
+.compare-3d:hover { text-decoration: underline; }
+
+
+/* 비교할 매물 고르기 */
+.wish-pick { margin-top: 32px; }
+.wish-pick h2 { margin: 0 0 16px; }
+.pick-list { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 4px; }
+.pick-list label {
+  display: flex; gap: 12px; align-items: center; margin: 0; cursor: pointer;
+  min-height: 44px; padding: 0 12px; border-radius: var(--radius-sm); font-weight: 600;
+}
+.pick-list label:hover { background: var(--color-white); }
+.pick-list input { width: 20px; height: 20px; min-height: 0; padding: 0; accent-color: var(--color-primary); flex-shrink: 0; }
+.pick-list .muted { font-weight: 400; }
+.wish-pick .wish-hint { margin: 12px 0 0; font-size: 14px; }
+
+/* 화면엔 안 보이고 화면 읽기 프로그램만 읽는 글자 */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* 좁은 화면: 표를 옆으로 밀어도 항목 이름 칸은 왼쪽에 붙어 있게 (무엇을 비교 중인지 안 잃음) */
+@media (max-width: 640px) {
+  .compare { min-width: 600px; }
+  .compare col.col-label { width: 92px; }
+  .compare th, .compare td { padding: 14px 14px; }
+  .compare tbody th, .compare thead th:first-child {
+    position: sticky; left: 0; z-index: 1;
+    box-shadow: 1px 0 0 var(--color-border);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .compare-thumb img { transition: none; }
+  .compare-thumb:hover img { transform: none; }
+}
