@@ -56,7 +56,10 @@ def get_client() -> openai.AsyncOpenAI:
     """키가 없어도 서버(화면·위젯)는 뜨도록, 클라이언트는 첫 질문 때 만들어요."""
     global _client
     if _client is None:
-        _client = openai.AsyncOpenAI()   # OPENAI_API_KEY 를 읽어요
+        # 대시보드에 붙여 넣은 키 끝에 줄바꿈·공백이 섞이면 요청 헤더가 깨져서
+        # 인증 오류가 아니라 "연결 오류"로 나타나요. 앞뒤 공백을 지워서 막아요.
+        key = (os.getenv("OPENAI_API_KEY") or "").strip()
+        _client = openai.AsyncOpenAI(api_key=key or None, timeout=60, max_retries=2)
     return _client
 
 
@@ -157,7 +160,9 @@ async def chat(req: ChatRequest, request: Request):
             # 요청이 몰렸거나, 크레딧이 떨어졌을 때(insufficient_quota)도 429예요.
             log.error("OpenAI 429: %s", e.message)
             yield _sse({"type": "error", "message": "지금 질문이 몰려 있어요. 잠시 뒤 다시 보내 주세요."})
-        except openai.APIConnectionError:
+        except openai.APIConnectionError as e:
+            # 원인(시간 초과, DNS, 깨진 헤더 등)을 로그에 남겨야 Render Logs에서 고칠 수 있어요.
+            log.error("OpenAI 연결 실패: %r (원인: %r)", e, e.__cause__)
             yield _sse({"type": "error", "message": "답변 서버에 연결하지 못했어요. 잠시 뒤 다시 보내 주세요."})
         except openai.APIStatusError as e:
             log.error("OpenAI API 오류 %s: %s", e.status_code, e.message)

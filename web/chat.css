@@ -24,7 +24,7 @@
   --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
 body {
   display: flex; flex-direction: column;
   font-family: var(--font); color: var(--text); background: var(--bg-weak);
@@ -39,7 +39,7 @@ body {
 body.embed .top { display: none; }
 
 /* 대화 영역 */
-.log { flex: 1; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: var(--gap-turn); scroll-behavior: smooth; }
+.log { position: relative; flex: 1; min-height: 0; overflow-y: auto; padding: 20px 16px; display: flex; flex-direction: column; gap: var(--gap-turn); scroll-behavior: smooth; }
 
 /* 턴: 겨리(왼쪽) / 나(오른쪽). 양쪽 여백을 같게 둬서 좌우 대칭으로 보여요 */
 .turn { display: grid; gap: 8px; max-width: 100%; }
